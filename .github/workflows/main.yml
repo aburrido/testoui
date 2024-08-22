@@ -1,4 +1,4 @@
-name: Download OUI File
+name: Upload OUI File to Repository
 
 on:
   workflow_dispatch: # 手动触发
@@ -6,7 +6,7 @@ on:
     - cron: '0 10 * * *' # 每天10点运行
 
 jobs:
-  download:
+  upload-oui-file:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,13 +21,14 @@ jobs:
         run: |
           mkdir -p archive
           mv oui.txt archive/oui-$(date +'%Y-%m-%d').txt
-      - name: Commit and push changes
+
+      - name: Commit and push the archive to the repository
         run: |
-          git config --local user.name "github-actions"
+          git config--local user.name "github-actions"
           git config --local user.email "github-actions@users.noreply.github.com"
-          git remote set-url origin https://${GITHUB_TOKEN}@githb.com/aburrido/testoui.git
-          git add archive/
-          git commit -m "Archive OUI file on $(date +'%Y-%m-%d')"
-          git push
+          git add archive/oui-$(date +'%Y-%m-%d').txt
+          git commit -m "Add new OUI archive"
+          # Push to the main branch or the branch you wish to update
+          git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
