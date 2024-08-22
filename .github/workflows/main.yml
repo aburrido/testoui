@@ -1,0 +1,33 @@
+name: Download OUI File
+
+on:
+  workflow_dispatch: # 手动触发
+  schedule:
+    - cron: '0 10 * * *' # 每天10点运行
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download oui.txt
+        run: |
+          wget --header="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" -O oui.txt https://standards-oui.ieee.org/oui/oui.txt
+
+      - name: Archive the file
+        run: |
+          mkdir -p archive
+          mv oui.txt archive/oui-$(date +'%Y-%m-%d').txt
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.name "github-actions"
+          git config --local user.email "github-actions@github.com"
+          git add archive/
+          git commit -m "Archive OUI file on $(date +'%Y-%m-%d')"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
